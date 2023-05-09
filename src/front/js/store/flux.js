@@ -1,52 +1,132 @@
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
-			message: null,
-			demo: [
-				{
-					title: "FIRST",
-					background: "white",
-					initial: "white"
-				},
-				{
-					title: "SECOND",
-					background: "white",
-					initial: "white"
-				}
-			]
+			user: {
+                name: "",
+                lastname: "",
+                username: "",
+                email: "",
+                password: ""
+            },
+
+			token: "",
+			myAccount: {
+                id: ""
+            },
+
+
+
+
 		},
 		actions: {
-			// Use getActions to call a function within a fuction
-			exampleFunction: () => {
-				getActions().changeColor(0, "green");
-			},
+		
+			cerrarSesion: (navigate) => {
+                setStore({user: {
+                    name: "",
+                    lastname: "",
+                    username: "",
+                    email: "",
+                    password: ""
+                }, 
+                token: "",
+            
+            })
+            navigate("/")
+            },
 
-			getMessage: async () => {
-				try{
-					// fetching data from the backend
-					const resp = await fetch(process.env.BACKEND_URL + "/api/hello")
-					const data = await resp.json()
-					setStore({ message: data.message })
-					// don't forget to return something, that is how the async resolves
-					return data;
-				}catch(error){
-					console.log("Error loading message from backend", error)
-				}
-			},
-			changeColor: (index, color) => {
-				//get the store
-				const store = getStore();
+			handleChange: (e) => {
+                let { user } = getStore();
 
-				//we have to loop the entire demo array to look for the respective index
-				//and change its color
-				const demo = store.demo.map((elm, i) => {
-					if (i === index) elm.background = color;
-					return elm;
-				});
+                const {
+                    target: { value, name },
+                } = e;
+                setStore({
+                    user: {
+                        ...user,
+                        [name]: value,
+                    },
+                });
+            },
+            handleUserRegister: () => {
+                const { user } = getStore();
+                fetch("http://127.0.0.1:3001/users", {
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    method: "POST",
+                    body: JSON.stringify(user),
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        alert("Usuario Creado Satisfactoriamente");
+                        setStore({
+                            user: {
+                                name: "",
+                                lastname: "",
+                                username: "",
+                                email: "",
+                                password: ""
+                            },
+                        });
+                        console.log(data);
+                    })
+                    .catch(error => {
+                        alert("Ocurrio un error al registrar al Usuario" + error.message);
+                        console.log(error)
+                    });
+            },
+            handleUserLogin: (e) => {
+                const { user, token, myAccount } = getStore();
+                fetch("http://127.0.0.1:3001/login", {
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    method: "POST",
+                    body: JSON.stringify(user),
+                })
+                    .then(res => res.json())
+                    .then((data) => {
+                        setStore({
+                            token: data.token,
+                            myAccount: {
+                                ...myAccount,
+                                id: data.id
+                            }
+                        })
+                        console.log(data)
+                        console.log(getStore());
+                    })
+                    .catch(error => console.log(error));
+                setStore({
+                    user: {
+                        username: "",
+                        password: ""
+                    },
+                });
+            },
 
-				//reset the global store
-				setStore({ demo: demo });
-			}
+			getAccount: (id) => {
+
+                fetch("http://localhost:5000/users/" + id, {
+                    headers: {
+                        "Content-Type": "application/json",
+
+                    },
+                    method: "GET",
+                })
+                    .then((res) => res.json())
+                    .then((data) => {
+                        setStore({ myAccount: data })
+
+                    })
+                    .catch(error => console.log(error));
+
+            },
+
+
+
+
+
 		}
 	};
 };
