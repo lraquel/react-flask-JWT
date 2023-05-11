@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useContext } from "react";
 import { Context } from "../store/appContext";
 
@@ -9,13 +9,13 @@ export const Login = () => {
         <div>
             <div className="container text-center col-3 mt-5 was-validated">
                 <div className="input-group m-3">
-                    <span className="input-group-text" id="basic-addon3">Email</span>
+                    <span className="input-group-text" id="basic-addon3">Username</span>
                     <input
                         type="text"
                         name="username"
                         className="form-control"
-                        placeholder="correo del usuario"
-                        aria-label="email"
+                        placeholder="username"
+                        aria-label="username"
                         aria-describedby="basic-addon3"
                         onChange={actions.handleChange}
                         value={store.user.username}

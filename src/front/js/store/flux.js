@@ -1,7 +1,7 @@
 const getState = ({ getStore, getActions, setStore }) => {
-	return {
-		store: {
-			user: {
+    return {
+        store: {
+            user: {
                 name: "",
                 lastname: "",
                 username: "",
@@ -9,32 +9,31 @@ const getState = ({ getStore, getActions, setStore }) => {
                 password: ""
             },
 
-			token: "",
-			myAccount: {
-                id: ""
+
+            token: "",
+            userProfile: {}
+
+
+
+
+        },
+        actions: {
+
+            cerrarSesion: (navigate) => {
+                setStore({
+                    user: {
+                        name: "",
+                        lastname: "",
+                        username: "",
+                        email: "",
+                        password: ""
+                    },
+                    token: "",
+                })
+                navigate("/")
             },
 
-
-
-
-		},
-		actions: {
-		
-			cerrarSesion: (navigate) => {
-                setStore({user: {
-                    name: "",
-                    lastname: "",
-                    username: "",
-                    email: "",
-                    password: ""
-                }, 
-                token: "",
-            
-            })
-            navigate("/")
-            },
-
-			handleChange: (e) => {
+            handleChange: (e) => {
                 let { user } = getStore();
 
                 const {
@@ -76,7 +75,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     });
             },
             handleUserLogin: (e) => {
-                const { user, token, myAccount } = getStore();
+                const { user, token } = getStore();
                 fetch("http://127.0.0.1:3001/login", {
                     headers: {
                         "Content-Type": "application/json"
@@ -88,10 +87,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     .then((data) => {
                         setStore({
                             token: data.token,
-                            myAccount: {
-                                ...myAccount,
-                                id: data.id
-                            }
+
                         })
                         console.log(data)
                         console.log(getStore());
@@ -105,18 +101,29 @@ const getState = ({ getStore, getActions, setStore }) => {
                 });
             },
 
-			getAccount: (id) => {
 
-                fetch("http://localhost:5000/users/" + id, {
+            fetchUsers: () => {
+                const { token } = getStore();
+                const URL = "http://127.0.0.1:3001/users/list";
+
+                const CONFIG = {
                     headers: {
                         "Content-Type": "application/json",
-
+                        'Authorization': 'Bearer ' + token
                     },
                     method: "GET",
-                })
-                    .then((res) => res.json())
+                }
+
+                fetch(URL, CONFIG)
+                    .then((res) => {
+                        console.log(res);
+                        return res.json();
+
+
+                    })
                     .then((data) => {
-                        setStore({ myAccount: data })
+                        console.log(data);
+                        setStore({ userProfile: data.result })
 
                     })
                     .catch(error => console.log(error));
@@ -125,10 +132,13 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 
 
+        }
 
 
-		}
-	};
+
+
+    }
 };
+
 
 export default getState;
